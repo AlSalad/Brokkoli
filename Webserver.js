@@ -67,7 +67,9 @@ app.put('/api/V1/blog/:id', function (req, res) {
 app.delete('/api/V1/blog/:id', function (req, res) {
     console.log('DELETE: /api/V1/blog/:id !')
     delete Blog[req.param.id]; //Kein Persistentes löschen in Datei aus Bequemlichkeit
-    
+   
+  
+ 
      
 })
 
@@ -80,16 +82,3 @@ app.post('/api/V1/blog', function (req, res) {
 
 // Funktion um Json Datei nach Element zu durchsuchen 
 
-function getByKey(source,key) {
-    var found = null;
-
-    for (var i = 0; i < source.length; i++) {
-        var element = source[i];
-
-        if (element.Key == key) {
-           found = element;
-       } 
-    }
-
-    return found;
-}
