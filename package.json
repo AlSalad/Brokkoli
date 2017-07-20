@@ -1,0 +1,25 @@
+{
+  "name": "projekt_webeng",
+  "version": "1.0.0",
+  "description": "REST API Projekt",
+  "main": "Webserver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlSalad/Brokkoli.git"
+  },
+  "keywords": [],
+  "author": "Konle, Krueger, Karl",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AlSalad/Brokkoli/issues"
+  },
+  "homepage": "https://github.com/AlSalad/Brokkoli#readme",
+  "dependencies": {
+    "express": "^4.15.3",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7"
+  }
+}

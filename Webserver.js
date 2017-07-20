@@ -31,12 +31,14 @@ app.use(function (req, res, next) {
 //##################################################################
 app.get('/api/V1/blog', function (req, res) {
     console.log('GET: /api/v1/blog returned!')
-     
-     res.sendFile(path.normalize(__dirname + '/blog.json', 'utf8'))
+    res.sendFile(path.normalize(__dirname + '/blog.json', 'utf8'))
 })
 
-app.get('/api/V1/blog/:id', function (req, res) {
+app.get('/api/V1/blog/:id', function (req, res,) {
   console.log('GET: /api/V1/blog/:id returned!')
+   var id = req.params.id;
+    console.log(id);
+    res.writeHead(200, {'Content-Type': 'application/json'});
     res.send('Hello World!')
 })
 
