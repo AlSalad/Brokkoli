@@ -66,6 +66,8 @@ app.put('/api/V1/blog/:id', function (req, res) {
 //##################################################################
 app.delete('/api/V1/blog/:id', function (req, res) {
     console.log('DELETE: /api/V1/blog/:id !')
+    delete Blog[req.param.id]; //Kein Persistentes löschen in Datei aus Bequemlichkeit
+    
      
 })
 
