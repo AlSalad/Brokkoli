@@ -2,9 +2,15 @@ const express = require('express')
 const app = express()
 var fs = require("fs");
 var path = require("path");
+var Blog = require('./blog.json'); //with path
+var User = require('./user.json'); //with path
+
 
 app.listen(3000, function () {
   console.log('Webserver listening on port 3000!')
+ // console.log(blog);
+ // console.log(user);
+  
 })
 
 // Add headers
@@ -36,8 +42,7 @@ app.get('/api/V1/blog', function (req, res) {
 
 app.get('/api/V1/blog/:id', function (req, res) {
     console.log('GET: /api/V1/blog/:id returned! ID: ' + req.params.id)
-   
-         res.send('ID : ' + req.params.id);
+    res.send(Blog[req.params.id]);
 })
 
 // PUT Routen
@@ -70,3 +75,19 @@ app.post('/api/V1/blog', function (req, res) {
     console.log('POST: /api/v1/blog !')
      
 })
+
+// Funktion um Json Datei nach Element zu durchsuchen 
+
+function getByKey(source,key) {
+    var found = null;
+
+    for (var i = 0; i < source.length; i++) {
+        var element = source[i];
+
+        if (element.Key == key) {
+           found = element;
+       } 
+    }
+
+    return found;
+}
