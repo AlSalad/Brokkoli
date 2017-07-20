@@ -34,12 +34,10 @@ app.get('/api/V1/blog', function (req, res) {
     res.sendFile(path.normalize(__dirname + '/blog.json', 'utf8'))
 })
 
-app.get('/api/V1/blog/:id', function (req, res,) {
-  console.log('GET: /api/V1/blog/:id returned!')
-   var id = req.params.id;
-    console.log(id);
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    res.send('Hello World!')
+app.get('/api/V1/blog/:id', function (req, res) {
+    console.log('GET: /api/V1/blog/:id returned! ID: ' + req.params.id)
+   
+         res.send('ID : ' + req.params.id);
 })
 
 // PUT Routen
