@@ -66,39 +66,26 @@ app.get('/api/V1/blog/:id', function (req, res) {
 //##################################################################
 
 //Login
-app.put('/api/V1/login', function (req, res) {
-    //console.log('PUT: /api/v1/login !') 
+app.put('/api/V1/login', function (req, res) { 
+  if (req.body.username != user.username || req.body.password != user.password) {
+    res.status(403).json({
+      message: 'Username or password is incorrect'
+    });
+    return;
+  }
 
-    if (req.body.username != User.username || req.body.password != User.password) {
-        res.status(401).send('Wrong Login');
-        return;
-    }
+    res.status(400).send('Success');
 
     var token = jwt.sign({
-        exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour exipry
+        exp: Math.floor(Date.now() / 1000) + (60 * 120), 
         username: User.username
-    }, 'asdf');
+     }, 'asdf');
+
 
     res.status(200).json({
         token: token
     });
 })
-
-module.exports = function(req, res, next) {
-  // if no token was provided or could not be verified, the request is not authenticated
-  res.locals.authenticated = false;
-  // look for the token
-  var token = req.headers['x-bernd-token'];
-  if (token) {
-    try {
-      var decodedJwt = jwt.verify(token, 'asdf');
-      res.locals.authenticated = true;
-      res.locals.token = decodedJwt;
-    } catch (e) {
-    }
-  }
-  next();
-}
 
 
 app.put('/api/V1/passwordRecovery', function (req, res) {
@@ -106,9 +93,33 @@ app.put('/api/V1/passwordRecovery', function (req, res) {
      
 })
 
+//Edit Blog entry
 app.put('/api/V1/blog/:id', function (req, res) {
-    console.log('PUT: /api/V1/blog/:id !')
-     
+    if (!Blog[req.params.id]) {
+        res.status(404).send('ID not exsiting');
+        return;
+    }
+
+    //   if (!res.locals.authenticated && blog[req.params.id].hidden) {
+    //     res.status(401).send();
+    //     return;
+    //   }
+
+    Blog[req.params.id].title   = req.body.title    || Blog[req.params.id].title;
+    Blog[req.params.id].picture = req.body.picture  || Blog[req.params.id].picture;
+    Blog[req.params.id].author  = req.body.author   || Blog[req.params.id].author;
+    Blog[req.params.id].about   = req.body.about    || Blog[req.params.id].about;
+    Blog[req.params.id].released= req.body.released || Blog[req.params.id].released;
+    Blog[req.params.id].hidden  = req.body.hidden   || Blog[req.params.id].hidden;
+    Blog[req.params.id].tags    = req.body.tags     || Blog[req.params.id].tags;
+
+    fs.writeFile('./data/blog.json', JSON.stringify(Blog), 'utf-8', (err) => {
+        if (err) {
+            res.status(500).json({error: err});
+        } else {
+            res.status(200).json(Blog[req.params.id]);
+        }
+    });
 })
 
 // DELETE Routen
@@ -116,16 +127,49 @@ app.put('/api/V1/blog/:id', function (req, res) {
 app.delete('/api/V1/blog/:id', function (req, res) {
     console.log('DELETE: /api/V1/blog/:id !')
     delete Blog[req.param.id]; //Kein Persistentes löschen in Datei aus Bequemlichkeit
-   
-  
- 
      
 })
 
 //POST Routen
 //##################################################################
 app.post('/api/V1/blog', function (req, res) {
-    console.log('POST: /api/v1/blog !')
+    // if (!res.locals.authenticated) {
+    //     res.status(401).send('You are not authorized');
+    //     return;
+    // }
+
+    if (!req.body.title || !req.body.picture || !req.body.author || !req.body.about || !req.body.released || !req.body.hidden || !req.body.tags) {
+        res.status(400).send('Something is missing!');
+        return;
+    }
+
+    var newIndex = blog.length;
+    while (blog.filter((element) => { return element.index == newIndex}).length > 0) {
+        newIndex += 1;
+    }
+
+    var newBlogPost = {
+    _id     : new ObjectID(),
+    index   : newIndex,
+    title   : req.body.title,
+    picture : req.body.picture,
+    author  : req.body.author,
+    about   : req.body.about,
+    released: req.body.released,
+    hidden  : req.body.hidden,
+    tags    : req.body.tags
+  };
+
+  blog.push(newBlogPost);
+
+  fs.writeFile('./data/blog.json', JSON.stringify(blog), 'utf-8', (err) => {
+    if (err) {
+      res.status(500).json({error: err});
+    } else {
+      res.status(201).json({index: newIndex, id: newBlogPost._id});
+    }
+  });
+  
 })
 
 // Funktion um Json Datei nach Element zu durchsuchen 
