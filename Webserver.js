@@ -4,6 +4,7 @@ var fs = require("fs");
 var path = require("path");
 var Blog = require('./blog.json'); //with path
 var User = require('./user.json'); //with path
+var jwt = require('jsonwebtoken');
 
 
 app.listen(3000, function () {
@@ -35,22 +36,70 @@ app.use(function (req, res, next) {
 
 // Get Routen
 //##################################################################
+
+//GET kompletten Blog
 app.get('/api/V1/blog', function (req, res) {
-    console.log('GET: /api/v1/blog returned!')
-    res.sendFile(path.normalize(__dirname + '/blog.json', 'utf8'))
+    //Wenn nicht eingeloggt, zeige nur Blogeinträge die nicht hidden sind
+    if (res.locals.authenticated) {
+        res.json(Blog);
+    } else {
+        res.json(Blog.filter((element) => {
+        return !element.hidden;
+        }));
+    }
+    
 })
 
+//GET spezifischen Blogeintrag
 app.get('/api/V1/blog/:id', function (req, res) {
-    console.log('GET: /api/V1/blog/:id returned! ID: ' + req.params.id)
-    res.send(Blog[req.params.id]);
+
+    //Wenn nicht eingeloggt
+    if (Blog[req.params.id].hidden && !res.locals.authenticated) {
+        res.status(401).send('You are not authorized');
+        return;
+    }
+
+    res.json(Blog[req.params.id]);
 })
 
 // PUT Routen
 //##################################################################
+
+//Login
 app.put('/api/V1/login', function (req, res) {
-    console.log('PUT: /api/v1/login !')
-    
+    //console.log('PUT: /api/v1/login !') 
+
+    if (req.body.username != User.username || req.body.password != User.password) {
+        res.status(401).send('Wrong Login');
+        return;
+    }
+
+    var token = jwt.sign({
+        exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour exipry
+        username: User.username
+    }, 'asdf');
+
+    res.status(200).json({
+        token: token
+    });
 })
+
+module.exports = function(req, res, next) {
+  // if no token was provided or could not be verified, the request is not authenticated
+  res.locals.authenticated = false;
+  // look for the token
+  var token = req.headers['x-bernd-token'];
+  if (token) {
+    try {
+      var decodedJwt = jwt.verify(token, 'asdf');
+      res.locals.authenticated = true;
+      res.locals.token = decodedJwt;
+    } catch (e) {
+    }
+  }
+  next();
+}
+
 
 app.put('/api/V1/passwordRecovery', function (req, res) {
     console.log('PUT: /api/V1/passwordRecovery !')
@@ -77,7 +126,6 @@ app.delete('/api/V1/blog/:id', function (req, res) {
 //##################################################################
 app.post('/api/V1/blog', function (req, res) {
     console.log('POST: /api/v1/blog !')
-     
 })
 
 // Funktion um Json Datei nach Element zu durchsuchen 
