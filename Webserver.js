@@ -64,9 +64,7 @@ app.get('/api/V1/blog/:id', function (req, res) {
 app.put('/api/V1/login', function (req, res) { 
 
   if (req.body.username != User.username || req.body.password != User.password) {
-    res.status(403).json({
-      message: 'Username or password is incorrect'
-    });
+    res.status(403).send('Failed')
     return;
   }
 
@@ -86,8 +84,7 @@ app.put('/api/V1/login', function (req, res) {
 
 //Password Recovery
 app.put('/api/V1/passwordRecovery', function (req, res) {
-    console.log('PUT: /api/V1/passwordRecovery !')
-     
+    console.log('PUT: /api/V1/passwordRecovery !')     
 })
 
 
