@@ -1,5 +1,7 @@
 const express = require('express')
+var bodyParser = require('body-parser');
 const app = express()
+
 var fs = require("fs");
 var path = require("path");
 var Blog = require('./blog.json'); //with path
@@ -8,36 +10,31 @@ var jwt = require('jsonwebtoken');
 
 
 app.listen(3000, function () {
-  console.log('Webserver listening on port 3000!')
- // console.log(blog);
- // console.log(user);
-  
+  console.log('Webserver listening on port 3000!') 
 })
 
 // Add headers
 app.use(function (req, res, next) {
-
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
-
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
     // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
     // Set to true if you need the website to include cookies in the requests sent
     // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
-
     // Pass to next layer of middleware
     next();
 });
 
-// Get Routen
-//##################################################################
+// for parsing application/json
+app.use(bodyParser.json()); 
+// for parsing application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
 
-//GET kompletten Blog
+//GET kompletten Blog´
+//##################################################################
 app.get('/api/V1/blog', function (req, res) {
     //Wenn nicht eingeloggt, zeige nur Blogeinträge die nicht hidden sind
     if (res.locals.authenticated) {
@@ -47,10 +44,10 @@ app.get('/api/V1/blog', function (req, res) {
         return !element.hidden;
         }));
     }
-    
 })
 
 //GET spezifischen Blogeintrag
+//##################################################################
 app.get('/api/V1/blog/:id', function (req, res) {
 
     //Wenn nicht eingeloggt
@@ -62,21 +59,21 @@ app.get('/api/V1/blog/:id', function (req, res) {
     res.json(Blog[req.params.id]);
 })
 
-// PUT Routen
+//Log In
 //##################################################################
-
-//Login
 app.put('/api/V1/login', function (req, res) { 
-  if (req.body.username != user.username || req.body.password != user.password) {
+
+  if (req.body.username != User.username || req.body.password != User.password) {
     res.status(403).json({
       message: 'Username or password is incorrect'
     });
     return;
   }
 
-    res.status(400).send('Success');
+    res.status(401).send('Success');
 
     var token = jwt.sign({
+        //2 Stunden aktiv
         exp: Math.floor(Date.now() / 1000) + (60 * 120), 
         username: User.username
      }, 'asdf');
@@ -87,16 +84,19 @@ app.put('/api/V1/login', function (req, res) {
     });
 })
 
-
+//Password Recovery
 app.put('/api/V1/passwordRecovery', function (req, res) {
     console.log('PUT: /api/V1/passwordRecovery !')
      
 })
 
-//Edit Blog entry
-app.put('/api/V1/blog/:id', function (req, res) {
+
+//EDIT Blog entry
+//##################################################################
+app.put('/api/V1/blog/:id', function (req, res) {   
+    
     if (!Blog[req.params.id]) {
-        res.status(404).send('ID not exsiting');
+        res.status(404).send('ID not existing');
         return;
     }
 
@@ -113,7 +113,7 @@ app.put('/api/V1/blog/:id', function (req, res) {
     Blog[req.params.id].hidden  = req.body.hidden   || Blog[req.params.id].hidden;
     Blog[req.params.id].tags    = req.body.tags     || Blog[req.params.id].tags;
 
-    fs.writeFile('./data/blog.json', JSON.stringify(Blog), 'utf-8', (err) => {
+    fs.writeFile('blog.json', JSON.stringify(Blog), 'utf-8', (err) => {
         if (err) {
             res.status(500).json({error: err});
         } else {
@@ -125,7 +125,6 @@ app.put('/api/V1/blog/:id', function (req, res) {
 // DELETE Routen
 //##################################################################
 app.delete('/api/V1/blog/:id', function (req, res) {
-    console.log('DELETE: /api/V1/blog/:id !')
     delete Blog[req.param.id]; //Kein Persistentes löschen in Datei aus Bequemlichkeit
      
 })
@@ -139,17 +138,18 @@ app.post('/api/V1/blog', function (req, res) {
     // }
 
     if (!req.body.title || !req.body.picture || !req.body.author || !req.body.about || !req.body.released || !req.body.hidden || !req.body.tags) {
-        res.status(400).send('Something is missing!');
+        res.status(400).send('We need more Information!');
         return;
     }
 
-    var newIndex = blog.length;
-    while (blog.filter((element) => { return element.index == newIndex}).length > 0) {
+    var newIndex = Blog.length;
+    while (Blog.filter((element) => { return element.index == newIndex}).length > 0) {
         newIndex += 1;
     }
 
     var newBlogPost = {
-    _id     : new ObjectID(),
+    
+    _id     : Math.random(), //Hier müssen wir noch eine gescheite ID kreieren
     index   : newIndex,
     title   : req.body.title,
     picture : req.body.picture,
@@ -160,9 +160,9 @@ app.post('/api/V1/blog', function (req, res) {
     tags    : req.body.tags
   };
 
-  blog.push(newBlogPost);
+  Blog.push(newBlogPost);
 
-  fs.writeFile('./data/blog.json', JSON.stringify(blog), 'utf-8', (err) => {
+  fs.writeFile('blog.json', JSON.stringify(Blog), 'utf-8', (err) => {
     if (err) {
       res.status(500).json({error: err});
     } else {
