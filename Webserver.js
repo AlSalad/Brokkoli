@@ -63,7 +63,6 @@ app.get('/api/V1/blog/:id',checkLogin, function (req, res) {
         res.status(401).send('You are not authorized');
         return;
     }
-
     res.json(Blog[req.params.id]);
 })
 
@@ -82,8 +81,7 @@ app.put('/api/V1/login',  function (req, res) {
         username: User.username
       }, 'secret');
    app.locals.token = token;
-   //console.log("Login Token" + app.locals.token);
-  // console.log(app.locals.token);
+  
     res.status(200).json({
         token: token
     });
@@ -135,11 +133,12 @@ app.delete('/api/V1/blog/:id', function (req, res) {
 
 //POST Routen
 //##################################################################
-app.post('/api/V1/blog', function (req, res) {
-    // if (!res.locals.authenticated) {
-    //     res.status(401).send('You are not authorized');
-    //     return;
-    // }
+app.post('/api/V1/blog', checkLogin, function (req, res) {
+     if (app.locals.authenticated == false) {
+         res.status(401).send('You are not authorized');
+         return;
+     }
+        
 
     if (!req.body.title || !req.body.picture || !req.body.author || !req.body.about || !req.body.released || !req.body.hidden || !req.body.tags) {
         res.status(400).send('We need more Information!');
@@ -151,6 +150,7 @@ app.post('/api/V1/blog', function (req, res) {
         newIndex += 1;
     }
 
+    console.log("Drinnen");
     var newBlogPost = {
     
     _id     : Math.random(), //Hier müssen wir noch eine gescheite ID kreieren
@@ -173,23 +173,26 @@ app.post('/api/V1/blog', function (req, res) {
       res.status(201).json({index: newIndex, id: newBlogPost._id});
     }
   });
-  
+  var Blog = require('./blog.json'); 
 })
-
 
 
 
 function checkLogin(req, res, next){
 
-    console.log("App.locals.token"+ app.locals.token); 
-    console.log ("Ausgelesener Token aus Header:" + req.headers.token);
-
+    //console.log("App.locals.token"+ app.locals.token); 
+    //console.log ("Ausgelesener Token aus Header:" + req.headers.token);
+    
     if (app.locals.token == req.headers.token) {
         app.locals.authenticated = true;
+
+        if (req.headers.token =="" || req.headers.token == undefined ) {
+        app.locals.authenticated = false; 
+    }
     }
     else {
         app.locals.authenticated = false;}
-   console.log("Gesetztezter Wert authenticated: " + app.locals.authenticated);
+   //console.log("Gesetztezter Wert authenticated: " + app.locals.authenticated);
    next();
    
 }
