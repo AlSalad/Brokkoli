@@ -4,14 +4,23 @@ const app = express()
 
 var fs = require("fs");
 var path = require("path");
-var Blog = require('./blog.json'); //with path
-var User = require('./user.json'); //with path
+var Blog = require('./blog.json'); 
+var User = require('./user.json'); 
 var jwt = require('jsonwebtoken');
+
+
+
+ // for parsing application/json
+app.use(bodyParser.json()); 
+// for parsing application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.listen(3000, function () {
   console.log('Webserver listening on port 3000!') 
 })
+
+
 
 // Add headers
 app.use(function (req, res, next) {
@@ -28,23 +37,20 @@ app.use(function (req, res, next) {
     next();
 });
 
-// for parsing application/json
-app.use(bodyParser.json()); 
-// for parsing application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
+
 
 //GET kompletten Blog´
 //##################################################################
-app.get('/api/V1/blog', function (req, res) {
-    //Wenn nicht eingeloggt, zeige nur Blogeinträge die nicht hidden sind
-    if (res.locals.authenticated) {
-        res.json(Blog);
-    } else {
-        res.json(Blog.filter((element) => {
-        return !element.hidden;
-        }));
+app.get('/api/V1/blog'  , checkLogin ,function (req, res) {
+  
+    if (app.locals.authenticated == true ){
+        res.json("authent passt");
     }
-})
+    else res.json("scheiße gelaufen");
+
+  
+  })
+
 
 //GET spezifischen Blogeintrag
 //##################################################################
@@ -61,26 +67,25 @@ app.get('/api/V1/blog/:id', function (req, res) {
 
 //Log In
 //##################################################################
-app.put('/api/V1/login', function (req, res) { 
+app.put('/api/V1/login',  function (req, res) { 
 
   if (req.body.username != User.username || req.body.password != User.password) {
-    res.status(403).send('Failed')
+    res.status(403).send('Authentification failed')
     return;
   }
-
-    res.status(401).send('Success');
-
+   else {    
     var token = jwt.sign({
         //2 Stunden aktiv
         exp: Math.floor(Date.now() / 1000) + (60 * 120), 
         username: User.username
-     }, 'asdf');
-
-
+      }, 'secret');
+   app.locals.token = token;
+   //console.log("Login Token" + app.locals.token);
+  // console.log(app.locals.token);
     res.status(200).json({
         token: token
     });
-})
+}})
 
 //Password Recovery
 app.put('/api/V1/passwordRecovery', function (req, res) {
@@ -169,5 +174,22 @@ app.post('/api/V1/blog', function (req, res) {
   
 })
 
-// Funktion um Json Datei nach Element zu durchsuchen 
+
+
+
+function checkLogin(req, res, next){
+
+    console.log("App.locals.token"+ app.locals.token); 
+    console.log ("Ausgelesener Token aus Header:" + req.headers.token);
+
+    if (app.locals.token == req.headers.token) {
+        app.locals.authenticated = true;
+    }
+    else {
+        app.locals.authenticated = false;}
+   console.log("Gesetztezter Wert authenticated: " + app.locals.authenticated);
+   next();
+   
+}
+
 
