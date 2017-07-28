@@ -95,17 +95,17 @@ app.put('/api/V1/passwordRecovery', function (req, res) {
 
 //EDIT Blog entry
 //##################################################################
-app.put('/api/V1/blog/:id', function (req, res) {   
+app.put('/api/V1/blog/:id',checkLogin,  function (req, res) {   
     
     if (!Blog[req.params.id]) {
         res.status(404).send('ID not existing');
         return;
     }
 
-    //   if (!res.locals.authenticated && blog[req.params.id].hidden) {
-    //     res.status(401).send();
-    //     return;
-    //   }
+       if (app.locals.authenticated == false && Blog[req.params.id].hidden ==true) {
+         res.status(401).send('Not authorized!');
+         return;
+       }
 
     Blog[req.params.id].title   = req.body.title    || Blog[req.params.id].title;
     Blog[req.params.id].picture = req.body.picture  || Blog[req.params.id].picture;
