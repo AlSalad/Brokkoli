@@ -51,17 +51,15 @@ app.get('/api/V1/blog'  , checkLogin ,function (req, res) {
       return !element.hidden;
     }));
     }
-
-  
   })
 
 
 //GET spezifischen Blogeintrag
 //##################################################################
-app.get('/api/V1/blog/:id', function (req, res) {
+app.get('/api/V1/blog/:id',checkLogin, function (req, res) {
 
     //Wenn nicht eingeloggt
-    if (Blog[req.params.id].hidden && !res.locals.authenticated) {
+    if (Blog[req.params.id].hidden && app.locals.authenticated == false) {
         res.status(401).send('You are not authorized');
         return;
     }
