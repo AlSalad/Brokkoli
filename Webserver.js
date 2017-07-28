@@ -134,11 +134,11 @@ app.delete('/api/V1/blog/:id', function (req, res) {
 //POST Routen
 //##################################################################
 app.post('/api/V1/blog', checkLogin, function (req, res) {
-     if (app.locals.authenticated == false) {
+    /* if (app.locals.authenticated == false) {
          res.status(401).send('You are not authorized');
          return;
      }
-        
+        */
 
     if (!req.body.title || !req.body.picture || !req.body.author || !req.body.about || !req.body.released || !req.body.hidden || !req.body.tags) {
         res.status(400).send('We need more Information!');
@@ -150,7 +150,7 @@ app.post('/api/V1/blog', checkLogin, function (req, res) {
         newIndex += 1;
     }
 
-    console.log("Drinnen");
+    //console.log("Drinnen");
     var newBlogPost = {
     
     _id     : Math.random(), //Hier müssen wir noch eine gescheite ID kreieren
@@ -164,6 +164,13 @@ app.post('/api/V1/blog', checkLogin, function (req, res) {
     tags    : req.body.tags
   };
 
+  // String to Bool for hidden 
+if (newBlogPost.hidden == "false") {
+    newBlogPost.hidden = false;
+}
+else {newBlogPost.hidden = true;
+}
+
   Blog.push(newBlogPost);
 
   fs.writeFile('blog.json', JSON.stringify(Blog), 'utf-8', (err) => {
@@ -173,7 +180,7 @@ app.post('/api/V1/blog', checkLogin, function (req, res) {
       res.status(201).json({index: newIndex, id: newBlogPost._id});
     }
   });
-  var Blog = require('./blog.json'); 
+  //var Blog = require('./blog.json'); 
 })
 
 
@@ -188,7 +195,7 @@ function checkLogin(req, res, next){
 
         if (req.headers.token =="" || req.headers.token == undefined ) {
         app.locals.authenticated = false; 
-    }
+         }
     }
     else {
         app.locals.authenticated = false;}
