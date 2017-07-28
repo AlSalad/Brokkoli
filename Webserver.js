@@ -134,11 +134,16 @@ app.delete('/api/V1/blog/:id', function (req, res) {
 //POST Routen
 //##################################################################
 app.post('/api/V1/blog', checkLogin, function (req, res) {
-    /* if (app.locals.authenticated == false) {
+    
+    console.log("App.locals.token"+ app.locals.token); 
+    console.log ("Ausgelesener Token aus Header:" + req.headers.token);
+
+
+     if (app.locals.authenticated == false) {
          res.status(401).send('You are not authorized');
          return;
      }
-        */
+       
 
     if (!req.body.title || !req.body.picture || !req.body.author || !req.body.about || !req.body.released || !req.body.hidden || !req.body.tags) {
         res.status(400).send('We need more Information!');
