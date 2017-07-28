@@ -44,9 +44,13 @@ app.use(function (req, res, next) {
 app.get('/api/V1/blog'  , checkLogin ,function (req, res) {
   
     if (app.locals.authenticated == true ){
-        res.json("authent passt");
+        res.json(Blog);
     }
-    else res.json("scheiße gelaufen");
+    else {
+        res.json(Blog.filter((element) => {
+      return !element.hidden;
+    }));
+    }
 
   
   })
