@@ -39,7 +39,7 @@ app.use(function (req, res, next) {
 
 
 
-//GET kompletten Blog´
+//GET kompletten Blog
 //##################################################################
 app.get('/api/V1/blog'  , checkLogin ,function (req, res) {
   
@@ -88,8 +88,36 @@ app.put('/api/V1/login',  function (req, res) {
 }})
 
 //Password Recovery
-app.put('/api/V1/passwordRecovery', function (req, res) {
-    console.log('PUT: /api/V1/passwordRecovery !')     
+//###########################################################
+app.put('/api/V1/passwordRecovery', checkLogin ,function (req, res) {
+     
+    if(app.locals.authenticated == true && User.password == req.body.oldPassword){
+    
+         User.password = req.body.newPassword; 
+    
+        fs.writeFile('user.json', JSON.stringify(User), 'utf-8', (err) => {
+                if (err) {
+                    res.status(500).json({error: err});
+                } else {
+                    // new Token
+                    var token = jwt.sign({
+                        //2 Stunden aktiv
+                        exp: Math.floor(Date.now() / 1000) + (60 * 120), 
+                        username: User.username
+                    }, 'secret');
+                    app.locals.token = token;
+                
+                    res.status(200).json({
+                        newToken: token
+                    });
+                }
+                    });
+      
+    } else {
+        res.status(401).send('Not authorized!');
+    }
+   
+
 })
 
 
