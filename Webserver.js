@@ -126,9 +126,24 @@ app.put('/api/V1/blog/:id',checkLogin,  function (req, res) {
 
 // DELETE Routen
 //##################################################################
-app.delete('/api/V1/blog/:id', function (req, res) {
-    delete Blog[req.param.id]; //Kein Persistentes löschen in Datei aus Bequemlichkeit
+app.delete('/api/V1/blog/:id', checkLogin, function (req, res) {
+    
      
+    if (app.locals.authenticated == false && Blog[req.params.id].hidden ==true) {
+         res.status(401).send('Not authorized!');
+         return;
+       } 
+
+       delete Blog[req.params.id]; //Kein Persistentes löschen in Datei aus Bequemlichkeit
+       //res.status(200).json("Erfolgreich gelöscht!");
+       console.log(Blog);
+       fs.writeFile('blog.json', JSON.stringify(Blog), 'utf-8', (err) => {
+    if (err) {
+      res.status(500).json({error: err});
+    } else {
+      res.status(200).json("Erfolgreich gelöscht!");
+    }
+  }); 
 })
 
 //POST Routen
