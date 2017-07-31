@@ -11,7 +11,7 @@ Luka Kröger
 ## Dev
 
 ### Installation (unter Windows)
-* `cmd -> npm install` -> Pakete installieren
+* `Github Repo Clonen inkl. node_modules`
 * `cmd -> node Webserver.js` -> Server starten
 
 ### Testen
@@ -24,7 +24,7 @@ mit Postman (https://getpostman.com/)
 ### Allgemein
 * Pfadpräfix für die einzelnen Endpoints: `/api/V1`
 * Soll der Request authentifiziert werden, muss im Header ein Token angegeben werden. Dies wird über den Endpunkt `/login`realisiert.
-
+* Header wird nach dem Key 'Token' durchsucht als Value muss der über den Login erhaltene Schhlüssel ohne "" verwendet werden. 
 ### Endpoints
 
 #### User
@@ -32,7 +32,7 @@ mit Postman (https://getpostman.com/)
 ##### Passwort ändern
 * Endpoint: `PUT /passwordRecovery`
 * Parameter:
-  * `password`
+  * `oldPassword`
   * `newpassword`
 * Authentifizierung: ja
   
@@ -78,7 +78,7 @@ mit Postman (https://getpostman.com/)
 
 #### Bestimmter Blogeintrag
 
-* Endpoint `GET /blog`
+* Endpoint `GET /blog/:id`
 * Authentifizierung
   * für nicht-öffentliche Blogeinträge (hidden) muss der Request authentifiziert werden (sonst HTTP 401)
 
